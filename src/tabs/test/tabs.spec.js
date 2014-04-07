@@ -777,5 +777,38 @@ describe('tabs', function() {
       expect(elm.find('.inner-tab-content').eq(1).text().trim()).toEqual(scope.tabs[0].tabs[1].content);
       expect(elm.find('.outer-tab-content').eq(0).text().trim()).toEqual(scope.tabs[0].content);
     }));
+
+    it('template path should be configurable', inject(function($compile, $rootScope, $templateCache) {
+      $templateCache.put('custom_tab_template',
+        '<div class="tabbable">' +
+          '<div class="custom-markup">' +
+            '<span>Some custom markup</span>' +
+            '<ul class="nav nav-{{type || \'tabs\'}}" ng-class="{\'nav-stacked\': vertical, \'nav-justified\': justified}" ng-transclude></ul>' +
+          '</div>' +
+          '<div class="tab-content">' +
+            '<div class="tab-pane"' +
+                 'ng-repeat="tab in tabs"' +
+                 'ng-class="{active: tab.active}"' +
+                 'tab-content-transclude="tab">' +
+            '</div>' +
+          '</div>' +
+        '</div>');
+
+      var scope = $rootScope.$new();
+
+      elm = $compile([
+        '<div>',
+        '  <tabset template-url="custom_tab_template">',
+        '    <tab heading="Stuff">',
+        '      Some stuff',
+        '    </tab>',
+        '  </tabset>',
+        '</div>'
+      ].join('\n'))(scope);
+      scope.$apply();
+
+      expect(elm.find('.custom-markup').length).toEqual(1);
+      expect(elm.find('.custom-markup span').text()).toEqual('Some custom markup');
+    }));
   });
 });
